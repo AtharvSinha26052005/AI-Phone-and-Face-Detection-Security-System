@@ -1,0 +1,7 @@
+path: C:/Users/KIIT/Desktop/final_yolo/donescene
+train: train/images
+val: valid/images
+test: test/images
+
+names:
+  0: phone

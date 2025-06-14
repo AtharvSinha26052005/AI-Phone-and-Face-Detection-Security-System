@@ -1,0 +1,89 @@
+/* Reset and base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+  color: #333;
+  padding: 40px 20px;
+}
+.page-wrapper {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.hero h1 {
+  font-size: 2.5em;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.subtitle {
+  font-size: 1.1em;
+  color: #555;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 30px auto;
+}
+
+/* Buttons */
+.actions {
+  text-align: center;
+  margin: 30px 0;
+}
+.btn {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  text-decoration: none;
+  margin: 10px;
+  transition: all 0.3s ease;
+}
+.primary {
+  background-color: #007bff;
+  color: white;
+}
+.primary:hover {
+  background-color: #0056b3;
+}
+.secondary {
+  background-color: #28a745;
+  color: white;
+}
+.secondary:hover {
+  background-color: #1e7e34;
+}
+
+/* Details Section */
+.details {
+  margin-top: 40px;
+}
+.details h2 {
+  font-size: 1.8em;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+.details p {
+  font-size: 1.05em;
+  line-height: 1.7;
+  color: #444;
+}
+
+/* Footer */
+footer {
+  margin-top: 50px;
+  text-align: center;
+  font-size: 0.9em;
+  color: #888;
+}

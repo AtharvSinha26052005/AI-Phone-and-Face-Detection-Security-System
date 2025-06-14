@@ -1,0 +1,32 @@
+[
+  {
+    "label": "phone",
+    "confidence": 0.41,
+    "bbox": [
+      0,
+      1183,
+      212,
+      1280
+    ]
+  },
+  {
+    "label": "phone",
+    "confidence": 0.32,
+    "bbox": [
+      0,
+      1173,
+      348,
+      1280
+    ]
+  },
+  {
+    "label": "phone",
+    "confidence": 0.27,
+    "bbox": [
+      64,
+      526,
+      225,
+      763
+    ]
+  }
+]

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phone Detection | Tata Technologies</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="page-wrapper">
+    <header class="hero">
+      <h1>📱 Phone Detection AI</h1>
+      <p class="subtitle">
+        A smart object detection system built for <strong>Tata Technologies</strong> using YOLOv8.
+        Detect phones in real time with webcam or from uploaded images.
+      </p>
+    </header>
+
+    <main class="actions">
+      <a class="btn primary" href="{{ url_for('upload_image') }}">📤 Upload Image</a>
+      <a class="btn secondary" href="{{ url_for('live') }}">🎥 Live Webcam Detection</a>
+    </main>
+
+    <section class="details">
+      <h2>Project Overview</h2>
+      <p>
+        This web-based phone detection system leverages the power of YOLOv8 deep learning to identify mobile phones
+        in various settings — on desks, in hands, or even at unusual angles. It's optimized for real-time usage with high accuracy,
+        making it ideal for corporate security and monitoring environments.<br><br>
+        The solution was created for <strong>Tata Technologies</strong> to showcase AI capability in automated visual inspection systems.
+      </p>
+    </section>
+
+    <footer>
+      <p>© 2025 Tata Technologies · YOLOv8 · Flask · OpenCV</p>
+    </footer>
+  </div>
+</body>
+</html>

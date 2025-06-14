@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function togglePause() {
+            fetch('/toggle_pause');
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Live Detection</h2>
+        <button class="btn" onclick="togglePause()">Pause/Resume</button>
+        <br><br>
+        <img src="{{ url_for('video_feed') }}" width="100%" style="max-width: 960px;">
+        <br><br>
+        <a href="{{ url_for('index') }}">Back to Home</a>
+    </div>
+</body>
+</html>

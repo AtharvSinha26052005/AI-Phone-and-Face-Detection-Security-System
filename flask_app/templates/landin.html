@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time Phone Detection System</title>
+    <meta name="description" content="Detect mobile phones in real-time using computer vision powered by YOLOv8s" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-bg-image {
+            position: absolute;
+            top: 10%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+          background: url('{{ url_for('static', filename='image2.jpg') }}') no-repeat center center;
+            background-size: contain;
+            opacity: 0.15;
+            transform: rotate(15deg);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(238, 90, 36, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(238, 90, 36, 0.4);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        /* Section Styles */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: #1f2937;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+
+        /* Overview Section */
+        .overview {
+            background: #f8fafc;
+            position: relative;
+        }
+
+        .overview-visual {
+            position: absolute;
+            top: 20%;
+            right: 5%;
+            width: 300px;
+            height: 200px;
+           background: url('{{ url_for('static', filename='image1.jpg') }}') no-repeat center center;
+            background-size: cover;
+            border-radius: 20px;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .overview-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+        }
+
+        .overview-highlight {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .highlight-image {
+            width: 100%;
+            height: 250px;
+           background: url('{{ url_for('static', filename='image1.jpg') }}') no-repeat center center;
+            background-size: cover;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .highlight-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        .highlight-text {
+            padding: 1rem;
+        }
+
+        .highlight-text h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .highlight-text p {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* Image Showcase */
+        .showcase {
+            background: white;
+        }
+
+        .image-gallery {
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .gallery-container {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 2rem 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .gallery-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-item {
+            flex: 0 0 300px;
+            height: 200px;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color:rgb(25, 118, 210);
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(25, 118, 210, 0.1), rgba(33, 150, 243, 0.1));
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .gallery-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Team Section */
+        .team {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .team-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+        }
+
+        .team-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .team-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-role {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1f2937;
+            color: #d1d5db;
+            padding: 3rem 0 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-link {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: #667eea;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 2rem;
+            color: #9ca3af;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Scroll animations */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .scroll-animate.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            section {
+                padding: 60px 0;
+            }
+
+            .overview-content {
+                padding: 2rem;
+            }
+
+            .overview-highlight {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-bg-image {
+                width: 400px;
+                height: 400px;
+                right: -20%;
+            }
+
+            .overview-visual {
+                display: none;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .gallery-item {
+                flex: 0 0 250px;
+                height: 150px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: left;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .overview-content {
+                padding: 1.5rem;
+            }
+
+            .team-card {
+                padding: 1.5rem;
+            }
+
+            .hero-bg-image {
+                width: 300px;
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg-image"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1>Real-Time Phone Detection</h1>
+                <p>Detect mobile phones in real-time using computer vision powered by YOLOv8s</p>
+                <a href="{{ url_for('index_page') }}" class="cta-button">Test Out the Model</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Overview Section -->
+    <section class="overview">
+        <div class="overview-visual"></div>
+        <div class="container">
+            <h2 class="section-title scroll-animate">Project Overview</h2>
+            <div class="overview-content scroll-animate">
+                <p>Our project delivers an efficient and accurate phone detection system powered by <strong>YOLOv8s</strong> — a lightweight yet powerful object detection model optimized for real-time performance.</p>
+                
+                <p>Trained on a curated dataset of over <strong>1400 annotated images</strong>, the model is fine-tuned using advanced techniques like learning rate scheduling, weight decay regularization, and data augmentation (including HSV transforms, flipping, mosaic, and mixup). These enhancements help the system generalize across various phone orientations, lighting conditions, and backgrounds.</p>
+                
+                <div class="overview-highlight">
+                    <div>
+                        <p>Whether it's surveillance, classroom monitoring, or workplace compliance, our solution offers <strong>fast and accurate phone detection</strong> using state-of-the-art vision models.</p>
+                    </div>
+                    <div class="highlight-image"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Showcase Section -->
+    <section class="showcase">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Detection Results</h2>
+            <div class="image-gallery scroll-animate">
+             <div class="gallery-container" id="gallery">
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image3.jpg') }}" alt="Detection 3"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image4.jpg') }}" alt="Detection 4"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image5.jpg') }}" alt="Detection 5"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image6.jpg') }}" alt="Detection 6"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image7.jpg') }}" alt="Detection 7"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image8.jpg') }}" alt="Detection 8"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image9.jpg') }}" alt="Detection 9"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image10.jpg') }}" alt="Detection 10"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image11.jpg') }}" alt="Detection 11"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image12.jpg') }}" alt="Detection 12"></div>
+    <div class="gallery-item"><img src="{{ url_for('static', filename='image13.jpg') }}" alt="Detection 13"></div>
+</div>
+
+                <div class="gallery-nav">
+                    <button class="nav-btn" onclick="scrollGallery('left')">‹</button>
+                    <button class="nav-btn" onclick="scrollGallery('right')">›</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Built with ❤️ by</h2>
+            <div class="team-grid">
+                <div class="team-card scroll-animate">
+                    <div class="team-avatar">AK</div>
+                    <div class="team-name">Adarsh Kumar</div>
+                    <div class="team-role">AI/ML Developer</div>
+                </div>
+                <div class="team-card scroll-animate">
+                    <div class="team-avatar">AS</div>
+                    <div class="team-name">Atharv Sinha</div>
+                    <div class="team-role">AI/ML Developer</div>
+                </div>
+                <div class="team-card scroll-animate">
+                    <div class="team-avatar">S</div>
+                    <div class="team-name">Shalagya</div>
+                    <div class="team-role">AI/ML Developer</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Real-Time Phone Detection</h3>
+                    <p>Powered by YOLOv8s and advanced computer vision techniques for accurate real-time detection.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <div>
+                        <a href="{{ url_for('index_page') }}" class="footer-link">Test Model</a><br>
+                        <a href="#" class="footer-link">Documentation</a><br>
+                        <a href="#" class="footer-link">API Reference</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div>
+                        <a href="#" class="footer-link">GitHub Repository</a><br>
+                        <a href="#" class="footer-link">Research Paper</a><br>
+                        <a href="#" class="footer-link">Contact Team</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Real-Time Phone Detection System. Built with advanced AI technology.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Gallery Navigation
+        function scrollGallery(direction) {
+            const gallery = document.getElementById('gallery');
+            const scrollAmount = 320;
+            
+            if (direction === 'left') {
+                gallery.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                gallery.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+
+        // Scroll Animation Observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all scroll-animate elements
+        document.addEventListener('DOMContentLoaded', () => {
+            const animateElements = document.querySelectorAll('.scroll-animate');
+            animateElements.forEach(el => observer.observe(el));
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add some interactive touch for mobile gallery
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        const gallery = document.getElementById('gallery');
+
+        gallery.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - gallery.offsetLeft;
+            scrollLeft = gallery.scrollLeft;
+        });
+
+        gallery.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+
+        gallery.addEventListener('mouseup', () => {
+            isDown = false;
+        });
+
+        gallery.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - gallery.offsetLeft;
+            const walk = (x - startX) * 2;
+            gallery.scrollLeft = scrollLeft - walk;
+        });
+    </script>
+</body>
+</html>
